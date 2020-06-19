@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include <unistd.h>
-
 #include <sys/reboot.h>
 
 #define MAXIMAL_INPUT_LENGTH 16384
@@ -20,6 +19,8 @@
 #define ERROR_BRACKETS 2
 #define ERROR_SYNTAX 3
 #define ERROR_SYMBOL 4
+
+#define NEWLINE "\033c"
 
 #define BLACK "\033[1;30m"
 #define RED "\033[1;31m"
@@ -34,7 +35,7 @@ static const char *error_list[] = {
     "OK",
     "Division by zero",
     "Unbalanced brackets",
-    "Error of the tokens order",
+    "Invalid tokens order",
     "Unknown symbol",
 };
 
@@ -168,44 +169,55 @@ static void calculate_6(double *answer) {
 }
 
 static void clear() {
-    fputs("\033c", stdout);
+    fputs(NEWLINE, stdout);
+    fflush(stdout);
 }
 
 static void help() {
-    fputs(MAGENTA "Welcome to " CYAN "Calculinux 1.0\n"
+    fputs(MAGENTA "Welcome to Calculinux 1.1!\n"
     MAGENTA "Type an expression and get the result\n"
-    MAGENTA "For example: " CYAN "1 / 2 + 3 * 2 ^ -2)\n" MAGENTA
-    "Type " CYAN "clear" MAGENTA " to clear the screen\n"
-    "Type " CYAN "help" MAGENTA " to print this message again\n"
-    "Type " CYAN "shutdown" MAGENTA " to turn the computer off"
-    RED " does not work currently" MAGENTA "\n"
-    "Type " CYAN "reboot" MAGENTA " to reboot\n", stdout);
+    MAGENTA "For example: " YELLOW "1 / 2 + 3 * 2 ^ -2\n" MAGENTA
+    "Type " YELLOW "clear" MAGENTA " to clear the screen\n"
+    "Type " YELLOW "help" MAGENTA " to print this message again\n"
+    "Type " YELLOW "poweroff" MAGENTA " to power off the computer\n"
+    "Type " YELLOW "reboot" MAGENTA " to reboot\n", stdout);
+    fflush(stdout);
 }
 
-void main() {
+static void linux_poweroff() {
+    reboot(RB_POWER_OFF);
+}
+
+static void linux_reboot() {
+    reboot(RB_AUTOBOOT);
+}
+
+int main() {
     clear();
     help();
-    while (true) {
+    while (!feof(stdin)) {
         double answer = 0;
         bool input_empty = false;
         error = ERROR_OK;
         *input = '\0';
         input_ptr = input;
         fputs(BLUE ">>> " GREEN, stdout);
+        fflush(stdout);
         fgets(input, MAXIMAL_INPUT_LENGTH, stdin);
         if (input[strlen(input) - 1] == '\n') {
             input[strlen(input) - 1] = '\0';
         } else {
             fputs("\n", stdout);
+            fflush(stdout);
         }
         if (strcmp(input, "clear") == 0) {
             clear();
         } else if (strcmp(input, "help") == 0) {
             help();
-        } else if (strcmp(input, "shutdown") == 0) {
-            reboot(RB_POWER_OFF);
+        } else if (strcmp(input, "poweroff") == 0) {
+            linux_poweroff();
         } else if (strcmp(input, "reboot") == 0) {
-            reboot(RB_AUTOBOOT);
+            linux_reboot();
         } else {
             get_token();
             if (!*token) {
@@ -218,9 +230,13 @@ void main() {
             }
             if (error) {
                 printf(RED "%s\n", error_list[error]);
+                fflush(stdout);
             } else if (!input_empty) {
-                printf(YELLOW "%lf\n", answer);
+                printf(GREEN "%lf\n", answer);
+                fflush(stdout);
             }
         }
     }
+    linux_poweroff();
+    return 0;
 }
