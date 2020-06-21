@@ -1,5 +1,5 @@
 ## About
-* This project is a simple standalone calculator  
+* This project is a simple standalone calculator
 * The idea is: linux kernel, isolinux bootloader and a small initramfs containing only the control program `/init` running with PID 1
 
 ## Files overview
@@ -9,7 +9,7 @@
 * `Makefile` - make script for building the distro
 
 ## How to build
-* Make sure packages `musl-tools`, `syslinux-utils`, `genisoimage` (or their alternatives) are installed
+* Make sure packages `libc6-dev`, `musl-tools`, `syslinux-utils`, `genisoimage`, `qemu-system-x86` (or their alternatives) are installed
 * Run `make`
 * This will download `linux` and `syslinux` sources, build them and generate the image
 

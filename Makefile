@@ -10,7 +10,7 @@ LINUX_URL=https://www.kernel.org/pub/linux/kernel/v5.x/linux-$(LINUX_VERSION).ta
 
 .PHONY: all linux_preconfig linux_config linux_compile linux_copy build test
 
-all: linux_compile linux_copy build test
+all: linux linux_compile linux_copy build test
 
 syslinux-$(SYSLINUX_VERSION).tar.xz:
 	wget $(SYSLINUX_URL)
@@ -27,6 +27,7 @@ linux: linux-$(LINUX_VERSION).tar.xz
 	rm --recursive --force linux-$(LINUX_VERSION) linux
 	tar --extract --file linux-$(LINUX_VERSION).tar.xz
 	mv linux-$(LINUX_VERSION) linux
+	cp linux.cfg linux/.config
 
 linux_preconfig:
 	cp linux.cfg linux/.config
